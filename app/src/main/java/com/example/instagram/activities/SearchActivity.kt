@@ -1,7 +1,8 @@
-package com.example.instagram
+package com.example.instagram.activities
 
 import android.os.Bundle
 import android.util.Log
+import com.example.instagram.R
 
 class SearchActivity : BaseActivity(1) {
     private val TAG = "SearchActivity"
