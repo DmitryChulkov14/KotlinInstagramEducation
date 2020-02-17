@@ -1,9 +1,15 @@
 package com.example.instagram.activities
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import com.example.instagram.R
 import com.example.instagram.models.User
 import com.example.instagram.views.PasswordDialog
@@ -13,15 +19,24 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import kotlinx.android.synthetic.main.activity_edit_profile.*
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 class EditProfileActivity : AppCompatActivity(), PasswordDialog.Listener {
     private val TAG = "EditProfileActivity"
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase: DatabaseReference
+    private lateinit var mStorage: StorageReference
     private lateinit var mUser: User
     private lateinit var mPendingUser: User
+    private val TAKE_PICTURE_REQUEST_CODE = 1
+    val simpleDateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
+    private lateinit var mImageUri: Uri
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,9 +45,12 @@ class EditProfileActivity : AppCompatActivity(), PasswordDialog.Listener {
 
         close_image.setOnClickListener { finish() } // close current activity
         save_image.setOnClickListener { unpdateProfile() }
+        change_photo_text.setOnClickListener { takeCameraPicture() }
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
+        mStorage = FirebaseStorage.getInstance().reference
+
         mDatabase.child("users").child(mAuth.currentUser!!.uid)
             .addListenerForSingleValueEvent(ValueEventListenerAdapter {
                 mUser = it.getValue(User::class.java)!!
@@ -43,6 +61,52 @@ class EditProfileActivity : AppCompatActivity(), PasswordDialog.Listener {
                 email_input.setText(mUser.email, TextView.BufferType.EDITABLE)
                 phone_input.setText(mUser.phone.toString(), TextView.BufferType.EDITABLE)
             })
+    }
+
+    private fun takeCameraPicture() {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (intent.resolveActivity(packageManager) != null) {
+            val imageFile = createImageFile()
+            mImageUri = FileProvider.getUriForFile(
+                this,
+                "com.example.instagram.fileprovider",
+                imageFile
+            )
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri)
+            startActivityForResult(intent, TAKE_PICTURE_REQUEST_CODE)
+        }
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == TAKE_PICTURE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            val uid = mAuth.currentUser!!.uid
+            mStorage.child("users/$uid/photo")
+                .putFile(mImageUri).addOnCompleteListener {
+                if (it.isSuccessful) {
+                    mDatabase.child("users/$uid/photo").setValue(it.result.toString())
+                        .addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                Log.d(TAG, "onActivityResult: photo saved successfully")
+                            } else {
+                                showToast(it.exception!!.message!!)
+                            }
+                        }
+                } else {
+                    showToast(it.exception!!.message!!)
+                }
+            }
+        }
+    }
+
+    private fun createImageFile(): File {
+        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${simpleDateFormat.format(Date())}_",
+            ".jpg",
+            storageDir
+        )
     }
 
     private fun unpdateProfile() {
@@ -108,8 +172,10 @@ class EditProfileActivity : AppCompatActivity(), PasswordDialog.Listener {
             else -> null
         }
 
-    private fun DatabaseReference.updateUser(uid: String, updates: Map<String, Any>,
-                                             onSuccess: () -> Unit) {
+    private fun DatabaseReference.updateUser(
+        uid: String, updates: Map<String, Any>,
+        onSuccess: () -> Unit
+    ) {
         child("users").child(uid).updateChildren(updates)
             .addOnCompleteListener {
                 if (it.isSuccessful) {
