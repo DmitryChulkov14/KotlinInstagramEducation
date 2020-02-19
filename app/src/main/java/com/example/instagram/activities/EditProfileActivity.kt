@@ -7,7 +7,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.instagram.R
 import com.example.instagram.models.User
-import com.example.instagram.utils.CameraPictureTaker
+import com.example.instagram.utils.CameraHelper
 import com.example.instagram.utils.FirebaseHelper
 import com.example.instagram.utils.ValueEventListenerAdapter
 import com.example.instagram.views.PasswordDialog
@@ -21,18 +21,18 @@ class EditProfileActivity : AppCompatActivity(), PasswordDialog.Listener {
 
     private lateinit var mUser: User
     private lateinit var mPendingUser: User
-    private lateinit var cameraPictureTaker: CameraPictureTaker
+    private lateinit var cameraHelper: CameraHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_profile)
         Log.d(TAG, "onCreate")
 
-        cameraPictureTaker = CameraPictureTaker(this)
+        cameraHelper = CameraHelper(this)
 
         close_image.setOnClickListener { finish() } // close current activity
         save_image.setOnClickListener { unpdateProfile() }
-        change_photo_text.setOnClickListener { cameraPictureTaker.takeCameraPicture() }
+        change_photo_text.setOnClickListener { cameraHelper.takeCameraPicture() }
 
         mFirebaseHelper = FirebaseHelper(this)
 
@@ -51,8 +51,8 @@ class EditProfileActivity : AppCompatActivity(), PasswordDialog.Listener {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == cameraPictureTaker.REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            mFirebaseHelper.uploadUserPhoto(cameraPictureTaker.imageUri!!) {
+        if (requestCode == cameraHelper.REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            mFirebaseHelper.uploadUserPhoto(cameraHelper.imageUri!!) {
                 val downloadTask = it!!.metadata!!.reference!!.downloadUrl
                 downloadTask.addOnSuccessListener { uri ->
                     val photoUrl = uri.toString()
