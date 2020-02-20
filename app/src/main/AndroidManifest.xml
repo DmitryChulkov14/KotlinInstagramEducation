@@ -30,6 +30,8 @@
         <activity
             android:name=".activities.RegisterActivity"
             android:windowSoftInputMode="stateVisible|adjustResize" />
+        <activity android:name=".activities.ProfileSettignsActivity" />
+        <activity android:name=".activities.AddFriednsActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
