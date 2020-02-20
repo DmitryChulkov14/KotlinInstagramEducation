@@ -15,13 +15,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.instagram.R
 import com.example.instagram.utils.FirebaseHelper
-import com.example.instagram.utils.GlideApp
 import com.example.instagram.utils.ValueEventListenerAdapter
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.feed_item.view.*
@@ -116,9 +114,5 @@ class FeedAdapter(private val posts: List<FeedPost>) :
     }
 
     override fun getItemCount(): Int = posts.size
-
-    private fun ImageView.loadImage(image: String?) {
-        GlideApp.with(this).load(image).centerCrop().into(this)
-    }
 
 }
