@@ -3,7 +3,6 @@ package com.example.instagram.activities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.text.Layout
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.instagram.R
 import com.example.instagram.models.User
 import com.example.instagram.utils.FirebaseHelper
-import com.example.instagram.utils.GlideApp
 import com.example.instagram.utils.ValueEventListenerAdapter
 import kotlinx.android.synthetic.main.activity_profile.*
 
@@ -44,16 +42,17 @@ class ProfileActivity : BaseActivity(4) {
 
         mFirebase = FirebaseHelper(this)
         mFirebase.currentUserReference().addValueEventListener(ValueEventListenerAdapter {
-            mUser = it.getValue(User::class.java)!!
+            mUser = it.asUser()!!
             profile_image.loadUserPhoto(mUser.photo)
             username_text.text = mUser.username
         })
 
         images_recycler.layoutManager = GridLayoutManager(this, 3)
-        mFirebase.database.child("images").child(mFirebase.auth.currentUser!!.uid).addValueEventListener(ValueEventListenerAdapter {
-            val images = it.children.map { it.getValue(String::class.java)!! }
-            images_recycler.adapter = ImagesAdapter(images + images + images + images)
-        })
+        mFirebase.database.child("images").child(mFirebase.auth.currentUser!!.uid)
+            .addValueEventListener(ValueEventListenerAdapter {
+                val images = it.children.map { it.getValue(String::class.java)!! }
+                images_recycler.adapter = ImagesAdapter(images)
+            })
     }
 }
 
@@ -64,7 +63,7 @@ class ImagesAdapter(private val images: List<String>) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val image = LayoutInflater.from(parent.context)
-                .inflate(R.layout.image_item, parent, false) as ImageView
+            .inflate(R.layout.image_item, parent, false) as ImageView
         return ViewHolder(image)
     }
 
