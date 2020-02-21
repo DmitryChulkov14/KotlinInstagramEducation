@@ -13,11 +13,10 @@ import com.example.instagram.utils.FirebaseHelper
 import com.example.instagram.utils.TaskSourceOnCompleteListener
 import com.example.instagram.utils.ValueEventListenerAdapter
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.database.DatabaseReference
 import kotlinx.android.synthetic.main.activity_add_friends.*
 import kotlinx.android.synthetic.main.add_friends_item.view.*
 
-class AddFriednsActivity : AppCompatActivity(), FriendsAdapter.Listener {
+class AddFriendsActivity : AppCompatActivity(), FriendsAdapter.Listener {
 
     private lateinit var mAdapter: FriendsAdapter
     private lateinit var mUsers: List<User>
@@ -31,7 +30,7 @@ class AddFriednsActivity : AppCompatActivity(), FriendsAdapter.Listener {
         mFirebase = FirebaseHelper(this)
         mAdapter = FriendsAdapter(this)
 
-        val uid = mFirebase.auth.currentUser!!.uid
+        val uid = mFirebase.currentUid()!!
 
         back_image.setOnClickListener { finish() }
         add_friedns_recycler.adapter = mAdapter
@@ -59,9 +58,6 @@ class AddFriednsActivity : AppCompatActivity(), FriendsAdapter.Listener {
     }
 
     private fun setFollow(uid: String, follow: Boolean, onSuccess: () -> Unit) {
-        fun DatabaseReference.setValueTrueOrRemove(value: Boolean) =
-            if (value) setValue(true) else removeValue()
-
         val followsTask = mFirebase.database.child("users").child(mUser.uid)
             .child("follows").child(uid).setValueTrueOrRemove(follow)
         val followersTask = mFirebase.database.child("users").child(uid)

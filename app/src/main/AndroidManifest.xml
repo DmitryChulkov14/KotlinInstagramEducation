@@ -31,7 +31,7 @@
             android:name=".activities.RegisterActivity"
             android:windowSoftInputMode="stateVisible|adjustResize" />
         <activity android:name=".activities.ProfileSettignsActivity" />
-        <activity android:name=".activities.AddFriednsActivity" />
+        <activity android:name=".activities.AddFriendsActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

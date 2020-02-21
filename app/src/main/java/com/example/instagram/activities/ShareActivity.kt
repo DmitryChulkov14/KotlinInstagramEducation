@@ -6,14 +6,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import com.example.instagram.R
+import com.example.instagram.models.FeedPost
 import com.example.instagram.models.User
 import com.example.instagram.utils.CameraHelper
 import com.example.instagram.utils.FirebaseHelper
 import com.example.instagram.utils.GlideApp
 import com.example.instagram.utils.ValueEventListenerAdapter
-import com.google.firebase.database.ServerValue
 import kotlinx.android.synthetic.main.activity_share.*
-import java.util.*
 
 class ShareActivity : BaseActivity(2) {
     private val TAG = "ShareActivity"
@@ -54,7 +53,7 @@ class ShareActivity : BaseActivity(2) {
         if (imageUri != null) {
             mFirebase.uploadSharePhoto(imageUri) {
                 it.metadata!!.reference!!.downloadUrl.addOnSuccessListener { uri ->
-                    val uid = mFirebase.auth.currentUser!!.uid
+                    val uid = mFirebase.currentUid()!!
                     mFirebase.addSharePhoto(uri.toString()) {
                         mFirebase.database.child("feed-posts").child(uid)
                             .push().setValue(mkFeedPost(uid, uri))
@@ -84,19 +83,3 @@ class ShareActivity : BaseActivity(2) {
     }
 }
 
-data class FeedPost(
-    val uid: String = "",
-    val username: String = "",
-    val image: String = "",
-    val likesCount: Int = 0,
-    val commentsCount: Int = 0,
-    val caption: String = "",
-    val comments: List<Comment> = emptyList(),
-    val timestamp: Any = ServerValue.TIMESTAMP,
-    val photo: String? = null
-) {
-
-    fun timestampDate(): Date = Date(timestamp as Long)
-}
-
-data class Comment(val uid: String, val username: String, val text: String)
