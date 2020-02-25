@@ -2,12 +2,16 @@ package com.example.instagram.activities
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.webkit.URLUtil
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.instagram.R
@@ -45,6 +49,12 @@ class ProfileActivity : BaseActivity(4) {
             mUser = it.asUser()!!
             profile_image.loadUserPhoto(mUser.photo)
             username_text.text = mUser.username
+            followers_count_text.text = mUser.followers.size.toString()
+            following_count_text.text = mUser.follows.size.toString()
+            profile_name.text = mUser.name
+            profile_bio.text = mUser.bio
+            setupProfileSiteText()
+            setupProfileInfoVisibility()
         })
 
         images_recycler.layoutManager = GridLayoutManager(this, 3)
@@ -52,7 +62,30 @@ class ProfileActivity : BaseActivity(4) {
             .addValueEventListener(ValueEventListenerAdapter {
                 val images = it.children.map { it.getValue(String::class.java)!! }
                 images_recycler.adapter = ImagesAdapter(images)
+                posts_count_text.text = images.size.toString()
             })
+    }
+
+    private fun setupProfileSiteText() {
+        profile_site.text = mUser.website
+        profile_site.setOnClickListener {
+            var url = mUser.website.toString()
+            if (!URLUtil.isNetworkUrl(url)) url = "http://$url"
+            startActivity(Intent(Intent.ACTION_VIEW).setData(Uri.parse(url)))
+        }
+    }
+
+    private fun setupProfileInfoVisibility() {
+        setTextViewVisibleOrGone(profile_name)
+        setTextViewVisibleOrGone(profile_bio)
+        setTextViewVisibleOrGone(profile_site)
+    }
+
+    private fun setTextViewVisibleOrGone(textView: TextView) {
+        if (textView.text.isEmpty())
+            textView.visibility = View.GONE
+        else
+            textView.visibility = View.VISIBLE
     }
 }
 

@@ -50,7 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         style="@style/secondary_small_btn"
-        android:text="Follow"
+        android:text="Unfollow"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/username_text"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -26,6 +26,19 @@
         <item name="android:textColor">@color/black</item>
     </style>
 
+    <style name="profile_text_name" parent="text">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="profile_text_site" parent="text">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/blue</item>
+        <item name="android:textColorLink">@color/blue</item>
+        <item name="android:textColorHighlight">@color/blue</item>
+    </style>
+
     <style name="toolbar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/toolbar_height</item>
