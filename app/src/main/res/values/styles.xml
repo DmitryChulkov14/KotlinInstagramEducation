@@ -9,6 +9,7 @@
     </style>
 
     <dimen name="toolbar_height">50dp</dimen>
+    <dimen name="bottom_navigation_bar_height">50dp</dimen>
 
     <style name="text">
         <item name="android:layout_width">wrap_content</item>
